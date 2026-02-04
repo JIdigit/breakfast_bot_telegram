@@ -7,6 +7,14 @@ if (!token) {
   process.exit(1);
 }
 
+// Dummy server for Render port binding
+const http = require('http');
+const PORT = process.env.PORT || 3000;
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Bot is running');
+}).listen(PORT, () => console.log(`Health check server listening on port ${PORT}`));
+
 const bot = new Telegraf(token);
 
 // Configuration for users

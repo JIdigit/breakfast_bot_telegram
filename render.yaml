@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: breakfast-bot
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: WIFE_CHAT_ID
+        sync: false
+      - key: HUSBAND_CHAT_ID
+        sync: false

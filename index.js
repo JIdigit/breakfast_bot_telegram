@@ -80,7 +80,17 @@ bot.action(/pick_(.+)/, async (ctx) => {
   if (HUSBAND_ID) {
     console.log(`Уведомляю мужа по ID: ${HUSBAND_ID}`);
     try {
-      await bot.telegram.sendMessage(HUSBAND_ID, `📢 Решение по завтраку!\n\nЖена выбрала: *${selection}* 🍳\nПора готовить!`, { parse_mode: 'Markdown' });
+      await bot.telegram.sendMessage(
+        HUSBAND_ID,
+        `📢 Решение по завтраку!\n\nЖена выбрала: *${selection}* 🍳\nПора готовить!`,
+        {
+          parse_mode: 'Markdown',
+          ...Markup.inlineKeyboard([
+            [Markup.button.callback('Принято! 👨🍳', 'ans_ok')],
+            [Markup.button.callback('Будет через 15 мин ⏳', 'ans_15')]
+          ])
+        }
+      );
       ctx.reply("Муж уведомлен! ✅");
     } catch (error) {
       console.error('Ошибка уведомления:', error.message);
@@ -92,6 +102,38 @@ bot.action(/pick_(.+)/, async (ctx) => {
     }
   } else {
     ctx.reply("Выбор сделан, но HUSBAND_CHAT_ID не настроен.");
+  }
+});
+
+bot.action('ans_ok', async (ctx) => {
+  if (HUSBAND_ID && ctx.from.id.toString() !== HUSBAND_ID) {
+    return ctx.answerCbQuery("Это кнопка для мужа! ⛔️");
+  }
+
+  await ctx.answerCbQuery("Ответ отправлен! ✅");
+
+  // Update husband's message
+  await ctx.editMessageText(`📢 Решение по завтраку!\n\nЗаказ принят! 👨🍳`, { parse_mode: 'Markdown' });
+
+  // Notify wife
+  if (WIFE_ID) {
+    await bot.telegram.sendMessage(WIFE_ID, "Муж принял заказ! 👨🍳\nСкоро будет готово! ❤️");
+  }
+});
+
+bot.action('ans_15', async (ctx) => {
+  if (HUSBAND_ID && ctx.from.id.toString() !== HUSBAND_ID) {
+    return ctx.answerCbQuery("Это кнопка для мужа! ⛔️");
+  }
+
+  await ctx.answerCbQuery("Ответ отправлен! ✅");
+
+  // Update husband's message
+  await ctx.editMessageText(`📢 Решение по завтраку!\n\nОтветил: через 15 мин. ⏳`, { parse_mode: 'Markdown' });
+
+  // Notify wife
+  if (WIFE_ID) {
+    await bot.telegram.sendMessage(WIFE_ID, "Муж ответил: будет через 15 минут! ⏳\nПотерпи немножко, любимая! 😘");
   }
 });
 

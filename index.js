@@ -25,7 +25,8 @@ const breakfastOptions = [
   '🍳 Омлет',
   '🧀 Омлет с сыром и зеленью',
   '🥣 Каша',
-  '🍳 Яичница'
+  '🍳 Яичница',
+  '🥣 Хлопья с молоком'
 ];
 
 const loveMessages = [
@@ -37,7 +38,23 @@ const loveMessages = [
 
 bot.start((ctx) => {
   const chatId = ctx.chat.id.toString();
-  ctx.reply(`Добро пожаловать в помощник по завтракам! 🍳\n\nТвой Chat ID: ${chatId}\n\nИспользуй /suggest, чтобы выбрать завтрак.\n\nКстати, помни, что муж тебя очень сильно любит! ❤️`);
+  ctx.reply(
+    `Добро пожаловать в помощник по завтракам! 🍳\n\nТвой Chat ID: ${chatId}\n\nНажми кнопку "Заказать", чтобы выбрать завтрак.\n\nКстати, помни, что муж тебя очень сильно любит! ❤️`,
+    Markup.keyboard([['Заказать']]).resize()
+  );
+});
+
+bot.hears('Заказать', (ctx) => {
+  const chatId = ctx.chat.id.toString();
+
+  if (WIFE_ID && chatId !== WIFE_ID) {
+    return ctx.reply("Извини, только жена может выбирать завтрак! 😉");
+  }
+
+  const buttons = breakfastOptions.map(option => [Markup.button.callback(option, `pick_${option}`)]);
+  const randomLove = loveMessages[Math.floor(Math.random() * loveMessages.length)];
+
+  ctx.reply(`Что ты хочешь на завтрак сегодня, любимая? 🥐\n\n${randomLove}`, Markup.inlineKeyboard(buttons));
 });
 
 bot.command('suggest', (ctx) => {
